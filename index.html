@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Organizer</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --primary-color: #bb86fc;
+            --secondary-color: #03dac6;
+            --danger-color: #cf6679;
+            --border-color: #333;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .category {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            padding: 20px;
+            transition: transform 0.2s;
+            border: 1px solid var(--border-color);
+        }
+        
+        .category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        
+        .category h2 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .physics h2 { color: #ff7043; }
+        .chemistry h2 { color: #ab47bc; }
+        .maths h2 { color: #ffee58; }
+        .travel h2 { color: #66bb6a; }
+        .documents h2 { color: #42a5f5; }
+        .odu h2 { color: #26c6da; }
+        .other h2 { color: #78909c; }
+        
+        .document-list {
+            list-style-type: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .document-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .document-list::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        
+        .document-list::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+        
+        .document-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .document-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .document-name {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-right: 10px;
+        }
+        
+        .document-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .document-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-color);
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            padding: 4px;
+        }
+        
+        .document-actions button:hover {
+            opacity: 1;
+        }
+        
+        .view-btn { color: var(--secondary-color) !important; }
+        .edit-btn { color: var(--primary-color) !important; }
+        .delete-btn { color: var(--danger-color) !important; }
+        
+        .add-document {
+            margin-top: 15px;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .upload-area:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .upload-area input {
+            display: none;
+        }
+        
+        .upload-area p {
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+        
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+        
+        .search-bar {
+            margin-bottom: 30px;
+            display: flex;
+        }
+        
+        .search-bar input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-color);
+            opacity: 0.6;
+        }
+        
+        .pdf-icon {
+            margin-right: 8px;
+            color: #e74c3c;
+        }
+        
+        @media (max-width: 768px) {
+            .categories {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Document Organizer</h1>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="total-docs">0</div>
+                <div class="stat-label">Total Documents</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="storage-used">0MB</div>
+                <div class="stat-label">Storage Used</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="last-added">-</div>
+                <div class="stat-label">Last Added</div>
+            </div>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search documents...">
+        </div>
+        
+        <div class="categories">
+            <!-- Physics Category -->
+            <div class="category physics">
+                <h2>Physics</h2>
+                <ul class="document-list" id="physics-list">
+                    <div class="empty-state">No documents yet</div>
+                </ul>
+                <div class="add-document">
+                    <div class="upload-area" onclick="document.getElementById('physics-upload').click()">
+                        <input type="file" id="physics-upload" accept=".pdf" onchange="handleFileUpload('physics', this)">
+                        <p>Click to upload PDF or drag & drop</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chemistry Category -->
+            <div class="category chemistry">
+                <h2>Chemistry</h2>
+                <ul class="document-list" id="chemistry-list">
+                    <div class="empty-state">No documents yet</div>
+                </ul>
+                <div class="add-document">
+                    <div class="upload-area" onclick="document.getElementById('chemistry-upload').click()">
+                        <input type="file" id="chemistry-upload" accept=".pdf" onchange="handleFileUpload('chemistry', this)">
+                        <p>Click to upload PDF or drag & drop</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Maths Category -->
+            <div class="category maths">
+                <h2>Maths</h2>
+                <ul class="document-list" id="maths-list">
+                    <div class="empty-state">No documents yet</div>
+                </ul>
+                <div class="add-document">
+                    <div class="upload-area" onclick="document.getElementById('maths-upload').click()">
+                        <input type="file" id="maths-upload" accept=".pdf" onchange="handleFileUpload('maths', this)">
+                        <p>Click to upload PDF or drag & drop</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Travel Category -->
+            <div class="category travel">
+                <h2>Travel</h2>
+                <ul class="document-list" id="travel-list">
+                    <div class="empty-state">No documents yet</div>
+                </ul>
+                <div class="add-document">
+                    <div class="upload-area" onclick="document.getElementById('travel-upload').click()">
+                        <input type="file" id="travel-upload" accept=".pdf" onchange="handleFileUpload('travel', this)">
+                        <p>Click to upload PDF or drag & drop</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Documents Category -->
+            <div class="category documents">
+                <h2>Documents</h2>
+                <ul class="document-list" id="documents-list">
+                    <div class="empty-state">No documents yet</div>
+                </ul>
+                <div class="add-document">
+                    <div class="upload-area" onclick="document.getElementById('documents-upload').click()">
+                        <input type="file" id="documents-upload" accept=".pdf" onchange="handleFileUpload('documents', this)">
+                        <p>Click to upload PDF or drag & drop</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ODU Category -->
+            <div class="category odu">
+                <h2>ODU</h2>
+                <ul class="document-list" id="odu-list">
+                    <div class="empty-state">No documents yet</div>
+                </ul>
+                <div class="add-document">
+                    <div class="upload-area" onclick="document.getElementById('odu-upload').click()">
+                        <input type="file" id="odu-upload" accept=".pdf" onchange="handleFileUpload('odu', this)">
+                        <p>Click to upload PDF or drag & drop</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other Category -->
+            <div class="category other">
+                <h2>Other</h2>
+                <ul class="document-list" id="other-list">
+                    <div class="empty-state">No documents yet</div>
+                </ul>
+                <div class="add-document">
+                    <div class="upload-area" onclick="document.getElementById('other-upload').click()">
+                        <input type="file" id="other-upload" accept=".pdf" onchange="handleFileUpload('other', this)">
+                        <p>Click to upload PDF or drag & drop</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Document storage - uses localStorage
+        let documents = {
+            physics: [],
+            chemistry: [],
+            maths: [],
+            travel: [],
+            documents: [],
+            odu: [],
+            other: []
+        };
+
+        // Initialize the app
+        function initApp() {
+            // Load documents from localStorage if available
+            const savedDocs = localStorage.getItem('documentOrganizer');
+            if (savedDocs) {
+                documents = JSON.parse(savedDocs);
+            }
+            
+            // Load documents for each category
+            for (const category in documents) {
+                updateCategoryList(category);
+            }
+            
+            // Update stats
+            updateStats();
+            
+            // Setup drag and drop
+            setupDragAndDrop();
+        }
+
+        // Save documents to localStorage
+        function saveDocuments() {
+            localStorage.setItem('documentOrganizer', JSON.stringify(documents));
+            updateStats();
+        }
+
+        // Update the list of documents for a category
+        function updateCategoryList(category) {
+            const listElement = document.getElementById(`${category}-list`);
+            listElement.innerHTML = '';
+            
+            if (documents[category].length === 0) {
+                listElement.innerHTML = '<div class="empty-state">No documents yet</div>';
+                return;
+            }
+            
+            documents[category].forEach((doc, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="pdf-icon">📄</span>
+                    <span class="document-name" title="${doc.name}">${doc.name}</span>
+                    <div class="document-actions">
+                        <button class="view-btn" onclick="viewDocument('${category}', ${index})" title="View">👁️</button>
+                        <button class="edit-btn" onclick="editDocument('${category}', ${index})" title="Rename">✏️</button>
+                        <button class="delete-btn" onclick="deleteDocument('${category}', ${index})" title="Delete">🗑️</button>
+                    </div>
+                `;
+                listElement.appendChild(li);
+            });
+        }
+
+        // Handle file upload
+        function handleFileUpload(category, inputElement) {
+            const files = inputElement.files;
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            if (file.type !== "application/pdf") {
+                alert("Please upload only PDF files");
+                return;
+            }
+            
+            // Check if file with same name already exists in this category
+            const existingIndex = documents[category].findIndex(d => d.name === file.name);
+            if (existingIndex !== -1) {
+                if (!confirm(`A document named "${file.name}" already exists. Replace it?`)) {
+                    return;
+                }
+                // Remove the existing document
+                documents[category].splice(existingIndex, 1);
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const documentData = {
+                    name: file.name,
+                    size: file.size,
+                    lastModified: file.lastModified,
+                    data: e.target.result.split(',')[1] // Store base64 encoded data
+                };
+                
+                documents[category].push(documentData);
+                saveDocuments();
+                updateCategoryList(category);
+                
+                // Reset the input
+                inputElement.value = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // View a document
+        function viewDocument(category, index) {
+            const doc = documents[category][index];
+            const pdfWindow = window.open("");
+            pdfWindow.document.write(`
+                <html>
+                    <head>
+                        <title>${doc.name}</title>
+                        <style>
+                            body { margin: 0; background-color: #525659; }
+                            embed { width: 100%; height: 100vh; }
+                        </style>
+                    </head>
+                    <body>
+                        <embed src="data:application/pdf;base64,${doc.data}#toolbar=1&navpanes=1&scrollbar=1">
+                    </body>
+                </html>
+            `);
+        }
+
+        // Edit a document name
+        function editDocument(category, index) {
+            const doc = documents[category][index];
+            const newName = prompt('Edit document name:', doc.name);
+            if (newName && newName.trim() && newName !== doc.name) {
+                doc.name = newName.trim();
+                saveDocuments();
+                updateCategoryList(category);
+            }
+        }
+
+        // Delete a document
+        function deleteDocument(category, index) {
+            if (confirm('Are you sure you want to delete this document?')) {
+                documents[category].splice(index, 1);
+                saveDocuments();
+                updateCategoryList(category);
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            let total = 0;
+            let totalSize = 0;
+            let lastAdded = null;
+            
+            for (const category in documents) {
+                total += documents[category].length;
+                documents[category].forEach(doc => {
+                    totalSize += doc.size || 0;
+                    if (!lastAdded || doc.lastModified > lastAdded.lastModified) {
+                        lastAdded = doc;
+                    }
+                });
+            }
+            
+            document.getElementById('total-docs').textContent = total;
+            document.getElementById('storage-used').textContent = `${(totalSize / (1024 * 1024)).toFixed(2)}MB`;
+            document.getElementById('last-added').textContent = lastAdded ? lastAdded.name : '-';
+        }
+
+        // Setup drag and drop functionality
+        function setupDragAndDrop() {
+            const uploadAreas = document.querySelectorAll('.upload-area');
+            
+            uploadAreas.forEach(area => {
+                // Prevent default drag behaviors
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    area.addEventListener(eventName, preventDefaults, false);
+                });
+                
+                // Highlight drop area when item is dragged over it
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    area.addEventListener(eventName, highlight, false);
+                });
+                
+                ['dragleave', 'drop'].forEach(eventName => {
+                    area.addEventListener(eventName, unhighlight, false);
+                });
+                
+                // Handle dropped files
+                area.addEventListener('drop', handleDrop, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function highlight() {
+                this.style.backgroundColor = 'rgba(187, 134, 252, 0.1)';
+                this.style.borderColor = 'var(--primary-color)';
+            }
+            
+            function unhighlight() {
+                this.style.backgroundColor = '';
+                this.style.borderColor = 'var(--border-color)';
+            }
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                const category = this.closest('.category').classList[1];
+                const input = document.getElementById(`${category}-upload`);
+                
+                input.files = files;
+                handleFileUpload(category, input);
+            }
+        }
+
+        // Initialize the app when the page loads
+        window.onload = initApp;
+    </script>
+</body>
+</html>
